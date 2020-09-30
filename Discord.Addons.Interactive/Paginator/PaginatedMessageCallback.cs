@@ -38,12 +38,12 @@ namespace Discord.Addons.Interactive
         /// The current page.
         /// </summary>
         private int page = 1;
-        
+
         /// <summary>
         /// The paginated message
         /// </summary>
         private readonly PaginatedMessage pager;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PaginatedMessageCallback"/> class.
         /// </summary>
@@ -59,7 +59,7 @@ namespace Discord.Addons.Interactive
         /// <param name="criterion">
         /// The criterion.
         /// </param>
-        public PaginatedMessageCallback(InteractiveService interactive, 
+        public PaginatedMessageCallback(InteractiveService interactive,
             SocketCommandContext sourceContext,
             PaginatedMessage pager,
             ICriterion<SocketReaction> criterion = null)
@@ -80,12 +80,12 @@ namespace Discord.Addons.Interactive
         /// Gets the interactive service.
         /// </summary>
         public InteractiveService Interactive { get; }
-        
+
         /// <summary>
         /// Gets the criterion.
         /// </summary>
         public ICriterion<SocketReaction> Criterion { get; }
-        
+
         /// <summary>
         /// Gets the message.
         /// </summary>
@@ -178,21 +178,35 @@ namespace Discord.Addons.Interactive
             var emote = reaction.Emote;
 
             if (emote.Equals(options.First))
+            {
                 page = 1;
+            }
             else if (emote.Equals(options.Next))
             {
                 if (page >= pages)
-                    return false;
-                ++page;
+                {
+                    page = 1;
+                }
+                else
+                {
+                    ++page;
+                }
             }
             else if (emote.Equals(options.Back))
             {
                 if (page <= 1)
-                    return false;
-                --page;
+                {
+                    page = pages;
+                }
+                else
+                {
+                    --page;
+                }
             }
             else if (emote.Equals(options.Last))
+            {
                 page = pages;
+            }
             else if (emote.Equals(options.Stop))
             {
                 await Message.DeleteAsync().ConfigureAwait(false);
@@ -258,14 +272,6 @@ namespace Discord.Addons.Interactive
                 Timestamp = current.TimeStamp ?? pager.TimeStamp
             };
 
-            /*var builder = new EmbedBuilder()
-                .WithAuthor(pager.Author)
-                .WithColor(pager.Color)
-                .WithDescription(pager.Pages.ElementAt(page - 1).Description)
-                .WithImageUrl(current.ImageUrl ?? pager.DefaultImageUrl)
-                .WithUrl(current.Url)
-                .WithFooter(f => f.Text = string.Format(options.FooterFormat, page, pages))
-                .WithTitle(current.Title ?? pager.Title);*/
             builder.Fields = pager.Pages.ElementAt(page - 1).Fields;
 
             return builder.Build();
